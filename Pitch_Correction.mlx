@@ -1,0 +1,56 @@
+% Load the audio file
+[input_signal, Fs] = audioread('C:\Users\dharm\OneDrive\Desktop\DSP Project\file_example_WAV_10MG.wav');
+
+% Define parameters
+window_size = 1024; % Size of the analysis window
+overlap = window_size/2; % Amount of overlap between windows
+hop_size = window_size - overlap; % Hop size for moving the window
+correction_strength = 0.5; % Strength of pitch correction (0 to 1)
+desired_pitch = 440; % Example desired pitch (you should set this based on your requirements)
+
+% Initialize output signal
+output_signal = zeros(size(input_signal));
+
+% Initialize time vectors for plotting
+t_input = (0:length(input_signal)-1) / Fs;
+t_output = (0:length(output_signal)-1) / Fs;
+
+% Pitch correction loop
+for i = 1:hop_size:length(input_signal)-window_size
+    % Extract a frame of the input signal
+    frame = input_signal(i:i+window_size-1);
+    
+    % Perform pitch detection (placeholder for your pitch detection algorithm)
+    % For now, let's assume a detected_pitch value (you should replace this with your actual pitch detection result)
+    detected_pitch = 440; % Placeholder value for detected pitch
+    
+    % Calculate the pitch correction factor
+    pitch_correction_factor = detected_pitch / desired_pitch;
+    
+    % Apply pitch correction to the frame
+    corrected_frame = pitch_correction_factor * frame;
+    
+    % Blend corrected frame with original frame
+    output_signal(i:i+window_size-1) = output_signal(i:i+window_size-1) + correction_strength * corrected_frame + (1 - correction_strength) * frame;
+end
+
+% Normalize output signal
+output_signal = output_signal / max(abs(output_signal));
+
+% Plot input and output signals
+subplot(2,1,1);
+plot(t_input, input_signal);
+title('Input Signal');
+xlabel('Time (s)');
+ylabel('Amplitude');
+grid on;
+
+subplot(2,1,2);
+plot(t_output, output_signal);
+title('Output Signal');
+xlabel('Time (s)');
+ylabel('Amplitude');
+grid on;
+
+% Write the output to a new audio file
+audiowrite('vocal_output.wav', output_signal, Fs);
